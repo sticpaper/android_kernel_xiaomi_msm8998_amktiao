@@ -3724,6 +3724,11 @@ void f2fs_exit_sysfs(void);
 int f2fs_register_sysfs(struct f2fs_sb_info *sbi);
 void f2fs_unregister_sysfs(struct f2fs_sb_info *sbi);
 
+#ifdef CONFIG_F2FS_RAPIDGC_NODE
+extern unsigned int f2fs_urgent_rapidgc;
+void __init f2fs_create_rapidgc_node(void);
+#endif
+
 /*
  * crypto support
  */

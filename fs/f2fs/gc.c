@@ -26,12 +26,19 @@
 
 static struct kmem_cache *victim_entry_slab;
 
+#ifdef CONFIG_F2FS_RAPIDGC_NODE
+#define TRIGGER_RAPID_GC (!screen_on && (power_supply_is_system_supplied() || f2fs_urgent_rapidgc))
+#else
 #define TRIGGER_RAPID_GC (!screen_on && power_supply_is_system_supplied())
+#endif
 static bool screen_on = true;
 static LIST_HEAD(gc_sbi_list);
 static DEFINE_MUTEX(gc_wakelock_mutex);
 static DEFINE_MUTEX(gc_sbi_mutex);
 static struct wakeup_source gc_wakelock;
+#ifdef CONFIG_F2FS_RAPIDGC_NODE
+unsigned int f2fs_urgent_rapidgc = 0;
+#endif
 
 static inline void rapid_gc_set_wakelock(void)
 {
@@ -253,7 +260,11 @@ static void f2fs_start_rapid_gc(void)
 					free_user_blocks(sbi);
 		if (invalid_blocks >
 		    ((long)((sbi->user_block_count - written_block_count(sbi)) *
+#ifdef CONFIG_F2FS_RAPIDGC_NODE
+			RAPID_GC_LIMIT_INVALID_BLOCK) / 100) || f2fs_urgent_rapidgc) {
+#else
 			RAPID_GC_LIMIT_INVALID_BLOCK) / 100)) {
+#endif
 			f2fs_start_gc_thread(sbi);
 			sbi->gc_thread->gc_wake = 1;
 			wake_up_interruptible_all(&sbi->gc_thread->gc_wait_queue_head);

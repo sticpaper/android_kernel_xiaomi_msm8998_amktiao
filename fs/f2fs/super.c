@@ -3786,6 +3786,9 @@ static int __init init_f2fs_fs(void)
 	if (err)
 		goto free_bio_enrty_cache;
 	f2fs_init_rapid_gc();
+#ifdef CONFIG_F2FS_RAPIDGC_NODE
+	f2fs_create_rapidgc_node();
+#endif
 
 	return 0;
 free_bio_enrty_cache:
