@@ -10,7 +10,7 @@ static struct proc_dir_entry *f2fs_node_root;
 
 static int urgent_show(struct seq_file *seq, void *v)
 {
-	seq_printf(seq, "urgent\n");
+	seq_printf(seq, "%s\n", f2fs_urgent_rapidgc ? "enabled" : "disabled");
 	return 0;
 }
 
