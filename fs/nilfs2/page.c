@@ -77,6 +77,7 @@ struct buffer_head *nilfs_grab_buffer(struct inode *inode,
 		page_cache_release(page);
 		return NULL;
 	}
+	bh->b_bdev = inode->i_sb->s_bdev;
 	return bh;
 }
 
