@@ -58,6 +58,13 @@ static void __iomem *msm_ps_hold;
 static phys_addr_t tcsr_boot_misc_detect;
 static void scm_disable_sdi(void);
 
+#ifdef CONFIG_INPUT_POWERKEY_PANIC
+bool force_reboot_rec = false;
+EXPORT_SYMBOL(force_reboot_rec);
+bool force_warm_reboot = false;
+EXPORT_SYMBOL(force_warm_reboot);
+#endif
+
 /* Runtime could be only changed value once.
  * There is no API from TZ to re-enable the registers.
  * So the SDI cannot be re-enabled when it already by-passed.
@@ -295,12 +302,29 @@ static void msm_restart_prepare(const char *cmd)
 				(cmd != NULL && cmd[0] != '\0'));
 	}
 
+#ifdef CONFIG_INPUT_POWERKEY_PANIC
+	if (force_warm_reboot) {
+		pr_info("[reboot]: Force warm reboot save last_kmsg\n");
+		need_warm_reset = true;
+	}
+#endif
+
 	/* Hard reset the PMIC unless memory contents must be maintained. */
 	if (need_warm_reset) {
 		qpnp_pon_system_pwr_off(PON_POWER_OFF_WARM_RESET);
 	} else {
 		qpnp_pon_system_pwr_off(PON_POWER_OFF_HARD_RESET);
 	}
+
+#ifdef CONFIG_INPUT_POWERKEY_PANIC
+	if (force_reboot_rec) {
+		pr_info("[reboot]: Force reboot recovery mode\n");
+		qpnp_pon_set_restart_reason(PON_RESTART_REASON_RECOVERY);
+		__raw_writel(0x77665502, restart_reason);
+		flush_cache_all();
+		return;
+	}
+#endif
 
 	if (cmd != NULL) {
 		if (!strncmp(cmd, "bootloader", 10)) {

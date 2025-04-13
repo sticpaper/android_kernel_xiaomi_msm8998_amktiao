@@ -844,4 +844,19 @@ config INPUT_STMVL53L0
 	 To compile this driver as a module, choose M here: the
 	 module will be called stmvl53l0.
 
+config INPUT_POWERKEY_PANIC
+	bool "Trigger powerkey into kernel panic event"
+	depends on INPUT
+	help
+	  Pressing the power button(powerkey) trigger panic.
+	  If unsure, say N.
+
+config POWERKEY_FORCE_WARM_REBOOT
+	bool "Powerkey trigger force warm reboot by default"
+	depends on INPUT_POWERKEY_PANIC
+
+config POWERKEY_FORCE_REBOOT_REC
+	bool "Powerkey trigger force reboot rec by default"
+	depends on INPUT_POWERKEY_PANIC
+
 endif
